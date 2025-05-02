@@ -205,6 +205,7 @@ public:
 	string username;
 	string password;
 	admin(string un, string pw);
+	admin() : username(""), password("") {}
 	void displayInfo();
 
 	~admin() {};
@@ -235,6 +236,7 @@ class item {
 
 public:
 	item(int idn, string na, string au, string it, string gn, bool av, unsigned int ri) : id(idn), name(na), author(au), itemtype(it), genre(gn), available(av), renterId(ri) {}
+	item() : id(0), name(""), author(""), itemtype(""), genre(""), available(true), renterId(0) {}
 	void displayInfo();
 	void displayInfoAdmin();
 	bool checkIfValid();
@@ -267,95 +269,169 @@ void item::displayInfoAdmin() {
 bool item::checkIfValid() {
 	if (id == -1) {
 		return false;
-	}else {
+	}
+	else {
 		return true;
 	}
 }
 
+// Define child classes for different item types
+class book : public item {
+public:
+	book(int idn, string na, string au, string it, string gn, bool av, unsigned int ri) : item(idn, na, au, it, gn, av, ri) {}
+};
+
+class magazine : public item {
+public:
+	magazine(int idn, string na, string au, string it, string gn, bool av, unsigned int ri) : item(idn, na, au, it, gn, av, ri) {}
+};
+
+class movie : public item {
+public:
+	movie(int idn, string na, string au, string it, string gn, bool av, unsigned int ri) : item(idn, na, au, it, gn, av, ri) {}
+};
+
+// Function to create an array of items from "book.txt"
+void createItemsArray(item items[], int& count) {
+	ifstream file("book.txt");
+	if (!file) {
+		cout << "Could not open book.txt" << endl;
+		return;
+	}
+	count = 0;
+	int id;
+	string name, author, itemtype, genre;
+	bool available;
+	unsigned int renterId;
+
+	while (file >> id >> ws && getline(file, name, ',') && getline(file, author, ',') && getline(file, itemtype, ',') && getline(file, genre, ',') >> available >> renterId) {
+		items[count] = item(id, name, author, itemtype, genre, available, renterId);
+		count++;
+	}
+	file.close();
+}
+
+// Function to create an array of users from "users.txt"
+void createUsersArray(user users[], int& count) {
+	ifstream file("users.txt");
+	if (!file) {
+		cout << "Could not open users.txt" << endl;
+		return;
+	}
+	count = 0;
+	string fn, ln, ad, em, pw;
+	unsigned long long pn;
+	unsigned long int iid;
+	unsigned int lid;
+	while (file >> fn >> ln >> ad >> pn >> em >> pw >> iid >> lid) {
+		users[count] = user(fn, ln, ad, pn, em, pw, iid, lid);
+		count++;
+	}
+	file.close();
+}
+
+// Function to create an array of admins from "librarians.txt"
+void createAdminsArray(admin admins[], int& count) {
+	ifstream file("librarians.txt");
+	if (!file) {
+		cout << "Could not open librarians.txt" << endl;
+		return;
+	}
+	count = 0;
+	string un, pw;
+	while (file >> un >> pw) {
+		admins[count] = admin(un, pw);
+		count++;
+	}
+	file.close();
+}
+
+
+
 // Search book func. Search books.txt for a keyword and print matching lines
 
 void searchBooks(const string& keyword) {
-    ifstream file("books.txt");
-    string line;
-    bool found = false;
+	ifstream file("books.txt");
+	string line;
+	bool found = false;
 
-    if (!file) {
-        cout << "Could not open books.txt" << endl;
-        return;
-    }
+	if (!file) {
+		cout << "Could not open books.txt" << endl;
+		return;
+	}
 
-    while (getline(file, line)) {
-        if (line.find(keyword) != string::npos) {
-            cout << line << endl;
-            found = true;
-        }
-    }
+	while (getline(file, line)) {
+		if (line.find(keyword) != string::npos) {
+			cout << line << endl;
+			found = true;
+		}
+	}
 
-    if (!found) {
-        cout << "No results found for: " << keyword << endl;
-    }
+	if (!found) {
+		cout << "No results found for: " << keyword << endl;
+	}
 
-    file.close();
+	file.close();
 }
 
 // Search user func. Search users.txt for a keyword by name or ID
 
 void searchUsers(string keyword) {
-    ifstream file("users.txt");
-    if (!file.is_open()) {
-        cout << "Could not open users.txt" << endl;
-        return;
-    }
+	ifstream file("users.txt");
+	if (!file.is_open()) {
+		cout << "Could not open users.txt" << endl;
+		return;
+	}
 
-    string line;
-    bool found = false;
+	string line;
+	bool found = false;
 
-    while (getline(file, line)) {
-        if (line.find(keyword) != string::npos) {
-            cout << line << endl;
-            found = true;
-        }
-    }
+	while (getline(file, line)) {
+		if (line.find(keyword) != string::npos) {
+			cout << line << endl;
+			found = true;
+		}
+	}
 
-    file.close();
+	file.close();
 
-    if (!found) {
-        cout << "No user found with that keyword." << endl;
-    }
+	if (!found) {
+		cout << "No user found with that keyword." << endl;
+	}
 }
 
 // Sep func. Add a new line to the end of the specified file
 
 void addToFile(string filename, string newLine) {
-    ofstream file(filename, ios::app);
-    file << newLine << endl;
-    file.close();
-    cout << "Added line to " << filename << endl;
+	ofstream file(filename, ios::app);
+	file << newLine << endl;
+	file.close();
+	cout << "Added line to " << filename << endl;
 }
 
 // Sep func. Print all lines from the specified file
 
 void viewFile(string filename) {
-    ifstream file(filename);
-    string line;
-    while (getline(file, line)) {
-        cout << line << endl;
-    }
-    file.close();
+	ifstream file(filename);
+	string line;
+	while (getline(file, line)) {
+		cout << line << endl;
+	}
+	file.close();
 }
 
 // Sep func. Replace all lines in the specified file with new content
 void overwriteFile(string filename) {
-    ofstream file(filename);
-    string newContent;
-    cout << "Enter new content (type 'end' on a new line to finish):" << endl;
-    cin.ignore();
-    while (getline(cin, newContent)) {
-        if (newContent == "end") break;
-        file << newContent << endl;
-    }
-    file.close();
-    cout << "Overwrote " << filename << " with new content." << endl;
+	ofstream file(filename);
+	string newContent;
+	cout << "Enter new content (type 'end' on a new line to finish):" << endl;
+	cin.ignore();
+	while (getline(cin, newContent)) {
+		if (newContent == "end") break;
+		file << newContent << endl;
+	}
+	file.close();
+	cout << "Overwrote " << filename << " with new content." << endl;
 }
 
 
@@ -371,6 +447,17 @@ int main() {
 	string password; // Used to store the password of logged-in accounts.
 	string permlevel; // Used to store the permission level of a logged in account.  "Admin" is for administrators, while "User" is used for regular users.  Temporary variable.
 	int baseInput; // Holds the user's response to the "1, 2, 3, 4" command loop seen upon bootup
+
+	// Arrays to hold items, users, and admins
+	item book[100]; 
+	user users[100];
+	admin librarians[10]; 
+	int itemCount = 0, userCount = 0, adminCount = 0;
+
+	// Create arrays from files
+	createItemsArray(book, itemCount);  
+	createUsersArray(users, userCount);
+	createAdminsArray(librarians, adminCount); 
 
 
 	bool go = false; // Controls while loops within while loops.  An example is the login section segment you see after trying to log in as an admin or user.
@@ -427,11 +514,13 @@ int main() {
 							cout << "This input is invalid.  Please try again, or type \"exit\" to return to the previous screen." << endl;
 							std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 							std::cin.ignore(256, '\n');
-						} else if (firstName == "exit" || firstName == "Exit") {
+						}
+						else if (firstName == "exit" || firstName == "Exit") {
 							cout << "Returning." << endl;
 							go = true;
 							localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -444,11 +533,13 @@ int main() {
 							cout << "This input is invalid.  Please try again, or type \"exit\" to return to the previous screen." << endl;
 							std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 							std::cin.ignore(256, '\n');
-						} else if (lastName == "exit" || lastName == "Exit") {
+						}
+						else if (lastName == "exit" || lastName == "Exit") {
 							cout << "Returning." << endl;
 							go = true;
 							localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -461,11 +552,13 @@ int main() {
 							cout << "This input is invalid.  Please try again, or type \"exit\" to return to the previous screen." << endl;
 							std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 							std::cin.ignore(256, '\n');
-						} else if (address == "exit" || address == "Exit") {
+						}
+						else if (address == "exit" || address == "Exit") {
 							cout << "Returning." << endl;
 							go = true;
 							localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -482,7 +575,8 @@ int main() {
 							// } else if (phoneNumber == "exit" || phoneNumber == "Exit") {
 								// go = true;
 								// localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -495,11 +589,13 @@ int main() {
 							cout << "This input is invalid.  Please try again, or type \"exit\" to return to the previous screen." << endl;
 							std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 							std::cin.ignore(256, '\n');
-						} else if (email == "exit" || email == "Exit") {
+						}
+						else if (email == "exit" || email == "Exit") {
 							cout << "Returning." << endl;
 							go = true;
 							localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -512,11 +608,13 @@ int main() {
 							cout << "This input is invalid.  Please try again, or type \"exit\" to return to the previous screen." << endl;
 							std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 							std::cin.ignore(256, '\n');
-						} else if (password == "exit" || password == "Exit") {
+						}
+						else if (password == "exit" || password == "Exit") {
 							cout << "Returning." << endl;
 							go = true;
 							localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -533,7 +631,8 @@ int main() {
 						// } else if (institutionalId == "exit" || institutionalId == "Exit") {
 							// go = true;
 							// localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
@@ -548,29 +647,34 @@ int main() {
 							cout << "This input is invalid.  Please try again, or type \"exit\" to return to the previous screen." << endl;
 							std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 							std::cin.ignore(256, '\n');
-						} else if (userType == "exit" || userType == "Exit") {
+						}
+						else if (userType == "exit" || userType == "Exit") {
 							cout << "Returning." << endl;
 							go = true;
 							localGo = true;
-						} else {
+						}
+						else {
 							go = true;
 						}
 					}
 
 					// TODO:  Search the users.txt to find the highest available library ID and set libraryId to 1 higher than that value
 					// library ID is temporarily set to a value of 0.
-					if (localGo == false) { 
+					if (localGo == false) {
 						libraryId = 0;
 						if (userType == "student") {
 							student tempUser(firstName, lastName, address, phoneNumber, email, password, institutionalId, libraryId);
 							cout << endl << "Student account created successfully.  Returning." << endl;
-						} else if (userType == "faculty") {
+						}
+						else if (userType == "faculty") {
 							faculty tempUser(firstName, lastName, address, phoneNumber, email, password, institutionalId, libraryId);
 							cout << endl << "Faculty account created successfully.  Returning." << endl;
-						} else if (userType == "staff") {
+						}
+						else if (userType == "staff") {
 							staff tempUser(firstName, lastName, address, phoneNumber, email, password, institutionalId, libraryId);
 							cout << endl << "Staff account created successfully.  Returning." << endl;
-						} else {
+						}
+						else {
 							cout << "ERROR:  FAILED TO CREATE ACCOUNT." << endl;
 						}
 					}
@@ -589,7 +693,8 @@ int main() {
 				// Admin login
 				// Username and Password are both "Admin"
 				// TODO:  Set up more proper username and password detection, pulling from the .txt document
-			} else if (baseInput == 2) {
+			}
+			else if (baseInput == 2) {
 				while (go == false) {
 					cout << "Please insert username." << endl << "> ";
 					cin >> username;
@@ -605,10 +710,12 @@ int main() {
 						go = true;
 						globalGo = true;
 						// Allows users to return to previous screen
-					} else if (username == "exit" || password == "exit" || username == "Exit" || password == "Exit") {
+					}
+					else if (username == "exit" || password == "exit" || username == "Exit" || password == "Exit") {
 						cout << "Returning." << endl;
 						go = true;
-					} else {
+					}
+					else {
 						cout << endl << "This username and password are incorrect.  Please try again, or type \"exit\" to return to the previous screen.";
 					}
 
@@ -622,7 +729,8 @@ int main() {
 				// User login
 					// Username and Password are both "User"
 					// TODO:  Set up more proper username and password detection, pulling from the .txt document
-			} else if (baseInput == 3) {
+			}
+			else if (baseInput == 3) {
 				while (go == false) {
 					cout << "Please insert username." << endl << "> ";
 					cin >> username;
@@ -638,10 +746,12 @@ int main() {
 						go = true;
 						globalGo = true;
 						// Allows users to return to previous screen
-					} else if (username == "exit" || password == "exit" || username == "Exit" || password == "Exit") {
+					}
+					else if (username == "exit" || password == "exit" || username == "Exit" || password == "Exit") {
 						cout << "Returning." << endl;
 						go = true;
-					} else {
+					}
+					else {
 						cout << endl << "This username and password are incorrect.  Please try again, or type \"exit\" to return to the previous screen.";
 					}
 
@@ -650,14 +760,16 @@ int main() {
 				go = false;
 
 				// Exit
-			} else if (baseInput == 4) {
+			}
+			else if (baseInput == 4) {
 				cout << "See you next time!";
 				go = true;
 				globalGo = true;
 				universalGo = true;
 
 				// In case of invalid command
-			} else {
+			}
+			else {
 				cout << "Command not recognized.";
 				// TODO:  fix the issue where, if the command is not recognized, the program will infinitely accept that as its next bit.
 				std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
@@ -703,7 +815,8 @@ int main() {
 						cin >> inputString;
 						try {
 							inputInt = stoi(inputString);
-						} catch (const std::invalid_argument&) { validId = false; }
+						}
+						catch (const std::invalid_argument&) { validId = false; }
 						catch (const std::out_of_range&) { validId = false; }
 
 						bool itemExists = false; // boolean to check if the id exists within the inventory.  If an item with the given id exists, available = true;
@@ -714,17 +827,20 @@ int main() {
 							itemAvailable = true; // TODO:  THIS IS A TEMPORARY SETUP TO ALLOW THE PROGRAM TO CONTINUE, REMOVE THIS LINE OF CODE ONCE FINISHED WITH A PART OF THE PROGRAM THAT LETS THE PROGRAM CHECK IF A GIVEN ID EXISTS OR NOT
 						}
 						if (itemExists == true) {
-							if (itemAvailable == true){
+							if (itemAvailable == true) {
 								go = true;
-							} else {
+							}
+							else {
 								// In the case that itemExists = true, but itemAvailable = false;
 								cout << "That item is currently being rented, or is otherwise unavailable to rent.  Please try again." << endl;
 							}
-						} else if (inputString == "exit" || inputString == "Exit") {
+						}
+						else if (inputString == "exit" || inputString == "Exit") {
 							cout << "Returning." << endl;
 							localGo = true;
 							go = true;
-						} else {
+						}
+						else {
 							cout << "This input is invalid, or no item with that id exists.  Please try again." << endl;
 						}
 						validId = true;
@@ -742,12 +858,13 @@ int main() {
 
 				}
 
-			// - Can search for books, journals or other inventory items (Regulated by the Search Function class)
-				// - Can search by title, author or publisher
-				// - Admins can search for users by id or name, which users don't get access to
-				// - Admins can see the user id of who owns a book, while searching for books, while users do not
-				  // Admins are supposed to also be able to search users by keyword input, but that seems really difficult so I'm willing to take the minor grade penalty for not having it
-			} else if (input == "search") {
+				// - Can search for books, journals or other inventory items (Regulated by the Search Function class)
+					// - Can search by title, author or publisher
+					// - Admins can search for users by id or name, which users don't get access to
+					// - Admins can see the user id of who owns a book, while searching for books, while users do not
+					  // Admins are supposed to also be able to search users by keyword input, but that seems really difficult so I'm willing to take the minor grade penalty for not having it
+			}
+			else if (input == "search") {
 				bool localGo = false;
 				// Allows admins to search the book inventory or the users list
 				// If the logged in user is not an admin, it defaults to only searching the book inventory
@@ -888,12 +1005,13 @@ int main() {
 								cout << "ERROR:  FAILED TO PROPERLY RETURN INVENTORY SEARCH TYPE.";
 							}
 
-							if (localGo==false){
-								for (int i = 0; i <= 9; i++){
+							if (localGo == false) {
+								for (int i = 0; i <= 9; i++) {
 									if (invSearchReturn[i]->checkIfValid()) { // checkIfvalid checks if the item's id is equal to -1, which it will only equal if it is one of the placeholder items created at initialization
 										if (permlevel == "Admin") {
 											invSearchReturn[i]->displayInfoAdmin(); // If the user is an admin, displays the id number of whoever is renting a given item
-										} else {
+										}
+										else {
 											invSearchReturn[i]->displayInfo(); // If the user is a regular user, does not display the id number of whoever is renting a given item
 										}
 									}
@@ -904,7 +1022,8 @@ int main() {
 
 
 							// Searching users.txt
-						} else if (searchFor == "users") {
+						}
+						else if (searchFor == "users") {
 							while (go == false) {
 								cout << "Search the users list by what parameters?  Your options are: " << endl << "- name" << endl << "- id" << endl << "> ";
 								cin >> searchParam;
@@ -948,7 +1067,8 @@ int main() {
 										cout << "Returning." << endl;
 										go = true;
 										localGo = true;
-									} else {
+									}
+									else {
 										go = true;
 									}
 								}
@@ -1008,7 +1128,7 @@ int main() {
 								cout << "ERROR:  FAILED TO PROPERLY RETURN USERS SEARCH TYPE.";
 							}
 
-							if(localGo == false){
+							if (localGo == false) {
 								for (int i = 0; i <= 9; i++) {
 									if (invSearchReturn[i]->checkIfValid()) { // checkIfvalid checks if the user's firstName is equal to "UNUSED-FIRSTNAME", which it will only equal if it is one of the placeholder items created at initialization
 										invSearchReturn[i]->displayInfo();
@@ -1028,9 +1148,10 @@ int main() {
 				}
 				go = false;
 
-			// - Can add, delete, or edit inventory items
-			// Admin only
-			} else if (input == "editinv") {
+				// - Can add, delete, or edit inventory items
+				// Admin only
+			}
+			else if (input == "editinv") {
 				if (permlevel == "Admin") {
 					go = false;
 					bool localGo = false;
@@ -1052,7 +1173,7 @@ int main() {
 							}
 						}
 						if (localGo == false) { go = false; }
-						
+
 						if (localGo == false) {
 							if (searchFor == "add") {
 								int tempId;
@@ -1175,7 +1296,8 @@ int main() {
 
 								localGo = true;
 
-							} else if (searchFor == "delete") {
+							}
+							else if (searchFor == "delete") {
 
 								string inputString;
 								int itemId;
@@ -1216,7 +1338,7 @@ int main() {
 									validId = true;
 								}
 
-								if (localGo==false) {
+								if (localGo == false) {
 									// TODO: Find the item in book.txt and delete it
 									// TODO: For any items with a higher libraryId than the deleted item (which is held as the value of the itemId variable), decrease their id number by 1 so that the item ids don't have a gap in it where the deleted item used to be
 								}
@@ -1225,7 +1347,8 @@ int main() {
 								go = true;
 								localGo = true;
 
-							} else if (searchFor == "edit") {
+							}
+							else if (searchFor == "edit") {
 
 								string inputString;
 								int itemId;
@@ -1258,7 +1381,7 @@ int main() {
 									validId = true;
 								}
 								if (localGo == false) { go = false; }
-								
+
 								string editParam;
 								string editParamType;
 								while (go == false) {
@@ -1268,17 +1391,21 @@ int main() {
 									if (editParam == "name" || editParam == "author" || editParam == "itemtype" || editParam == "genre") {
 										editParamType = "string";
 										go = true;
-									} else if (editParam == "available") {
+									}
+									else if (editParam == "available") {
 										editParamType = "bool";
 										go = true;
-									} else if (editParam == "renterId") {
+									}
+									else if (editParam == "renterId") {
 										editParamType = "int";
 										go = true;
-									} else if (editParam == "exit" || editParam == "Exit") {
+									}
+									else if (editParam == "exit" || editParam == "Exit") {
 										cout << "Returning." << endl;
 										go = true;
 										localGo = true;
-									} else {
+									}
+									else {
 										cout << "That's not a valid input!  Please input one of the given inputs, or input \"exit\" to return to the previous screen." << endl;
 									}
 								}
@@ -1286,7 +1413,7 @@ int main() {
 
 
 								if (editParam == "name") { // In the case that the user wants to edit "name"
-									
+
 									string replacementName;
 									while (go == false) {
 										cout << "What would you like to set the name value to?  Please make your input one word." << endl << "> ";
@@ -1308,7 +1435,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "author") { // In the case that the user wants to edit "author"
+								}
+								else if (editParam == "author") { // In the case that the user wants to edit "author"
 
 									string replacementAuthor;
 									while (go == false) {
@@ -1331,7 +1459,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "itemType") { // In the case that the user wants to edit "itemType"
+								}
+								else if (editParam == "itemType") { // In the case that the user wants to edit "itemType"
 
 									string replacementItemType;
 									while (go == false) {
@@ -1355,13 +1484,14 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "genre") { // In the case that the user wants to edit "genre"
+								}
+								else if (editParam == "genre") { // In the case that the user wants to edit "genre"
 
 									string replacementGenre;
 									while (go == false) {
 										cout << "What would you like to set the genre value to?  Please make your input one word." << endl << "> ";
 										cin >> replacementGenre;
-										
+
 										if (replacementGenre == "exit" || replacementGenre == "Exit") {
 											cout << "Returning." << endl;
 											go = true;
@@ -1378,8 +1508,9 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "available") { // In the case that the user wants to edit "available"
-									
+								}
+								else if (editParam == "available") { // In the case that the user wants to edit "available"
+
 									string boolAsString;
 									bool replacementAvailable;
 									while (go == false) {
@@ -1389,14 +1520,17 @@ int main() {
 										if (boolAsString == "true") {
 											replacementAvailable = true;
 											go = true;
-										} else if (boolAsString == "false") {
+										}
+										else if (boolAsString == "false") {
 											replacementAvailable = false;
 											go = true;
-										} else if (boolAsString == "exit" || boolAsString == "Exit") {
+										}
+										else if (boolAsString == "exit" || boolAsString == "Exit") {
 											cout << "Returning." << endl;
 											go = true;
 											localGo = true;
-										} else {
+										}
+										else {
 											cout << "That's not a valid input!  Please input one of the given inputs, or input \"exit\" to return to the previous screen." << endl;
 										}
 									}
@@ -1410,7 +1544,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "renterId") { // In the case that the user wants to edit "renterId"
+								}
+								else if (editParam == "renterId") { // In the case that the user wants to edit "renterId"
 									string inputString2;
 									unsigned int replacementId;
 									bool validInput = true;
@@ -1444,13 +1579,15 @@ int main() {
 
 									}
 									localGo = true;
-										
-								} else {
+
+								}
+								else {
 									cout << "ERROR: IMPROPERLY DEFINED VALUE OF EDITPARAM." << endl;
 								}
 
 
-							} else {
+							}
+							else {
 								cout << "ERROR:  FAILED TO PROPERLY RETURN ITEMS SEARCH TYPE.";
 								localGo = true;
 							}
@@ -1461,15 +1598,17 @@ int main() {
 					go = false;
 
 
-				} else { // Deny access to this command if the user is not an admin
+				}
+				else { // Deny access to this command if the user is not an admin
 					cout << "Access denied: Invalid credentials." << endl;
 				}
 
 
 
-			// - Can add, delete, or edit user accounts
-			// Admin only
-			} else if (input == "editusers") {
+				// - Can add, delete, or edit user accounts
+				// Admin only
+			}
+			else if (input == "editusers") {
 				if (permlevel == "Admin") {
 					go = false;
 					bool localGo = false;
@@ -1491,7 +1630,7 @@ int main() {
 							}
 						}
 						if (localGo == false) { go = false; }
-						
+
 						if (localGo == false) {
 							if (searchFor == "add") {
 								// Variable initialization
@@ -1684,7 +1823,8 @@ int main() {
 
 								localGo = true;
 
-							} else if (searchFor == "delete") {
+							}
+							else if (searchFor == "delete") {
 
 								string inputString;
 								int itemId;
@@ -1724,9 +1864,9 @@ int main() {
 									}
 									validId = true;
 								}
-								
+
 								if (localGo == false) {
-								
+
 									// TODO: Find the item in users.txt and delete it
 									// TODO: For any users with a higher id than the deleted user (which is held as the value of the itemId variable), decrease their id number by 1 so that the library ids don't have a gap in it where the deleted user used to be
 
@@ -1736,7 +1876,8 @@ int main() {
 								go = true;
 								localGo = true;
 
-							} else if (searchFor == "edit") {
+							}
+							else if (searchFor == "edit") {
 
 								string inputString;
 								int itemId;
@@ -1777,7 +1918,7 @@ int main() {
 									validId = true;
 								}
 								if (localGo == false) { go = false; }
-								
+
 								string editParam;
 								string editParamType;
 								while (go == false) {
@@ -1787,17 +1928,21 @@ int main() {
 									if (editParam == "firstName" || editParam == "lastName" || editParam == "address" || editParam == "email" || editParam == "password" || editParam == "institutionalId") {
 										editParamType = "string";
 										go = true;
-									} else if (editParam == "phoneNumber") {
+									}
+									else if (editParam == "phoneNumber") {
 										editParamType = "unsigned long long";
 										go = true;
-									} else if (editParam == "institutionalId") {
+									}
+									else if (editParam == "institutionalId") {
 										editParamType = "unsigned long int";
 										go = true;
-									} else if (editParam == "exit" || editParam == "Exit") {
+									}
+									else if (editParam == "exit" || editParam == "Exit") {
 										cout << "Returning." << endl;
 										go = true;
 										localGo = true;
-									} else {
+									}
+									else {
 										cout << "That's not a valid input!  Please input one of the given inputs, or input \"exit\" to return to the previous screen." << endl;
 									}
 								}
@@ -1805,7 +1950,7 @@ int main() {
 
 
 								if (editParam == "firstName") { // In the case that the user wants to edit "name"
-									
+
 									string replacementFirstName;
 									while (go == false) {
 										cout << "What would you like to set the firstName value to?" << endl << "> ";
@@ -1827,7 +1972,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "lastName") { // In the case that the user wants to edit "lastName"
+								}
+								else if (editParam == "lastName") { // In the case that the user wants to edit "lastName"
 
 									string replacementLastName;
 									while (go == false) {
@@ -1850,7 +1996,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "address") { // In the case that the user wants to edit "address"
+								}
+								else if (editParam == "address") { // In the case that the user wants to edit "address"
 
 									string replacementAddress;
 									while (go == false) {
@@ -1873,7 +2020,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "phoneNumber") { // In the case that the user wants to edit "phoneNumber"
+								}
+								else if (editParam == "phoneNumber") { // In the case that the user wants to edit "phoneNumber"
 									string inputString2;
 									unsigned long long replacementPhoneNumber;
 									bool validInput = true;
@@ -1888,11 +2036,13 @@ int main() {
 
 										if (validInput == true) {
 											go = true;
-										} else if (inputString2 == "exit" || inputString2 == "Exit") {
+										}
+										else if (inputString2 == "exit" || inputString2 == "Exit") {
 											cout << "Returning." << endl;
 											localGo = true;
 											go = true;
-										} else {
+										}
+										else {
 											cout << "This input is invalid.  Please try again." << endl;
 										}
 										validId = true;
@@ -1906,7 +2056,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "email") { // In the case that the user wants to edit "email"
+								}
+								else if (editParam == "email") { // In the case that the user wants to edit "email"
 
 									string replacementEmail;
 									while (go == false) {
@@ -1929,7 +2080,8 @@ int main() {
 									}
 									localGo = true;
 
-								} else if (editParam == "password") { // In the case that the user wants to edit "password"
+								}
+								else if (editParam == "password") { // In the case that the user wants to edit "password"
 
 									string replacementPassword;
 									while (go == false) {
@@ -1940,7 +2092,8 @@ int main() {
 											cout << "Returning." << endl;
 											go = true;
 											localGo = true;
-										} else {
+										}
+										else {
 											go = true;
 										}
 									}
@@ -1952,7 +2105,8 @@ int main() {
 									localGo = true;
 
 
-								} else if (editParam == "institutionalId") { // In the case that the user wants to edit "institutionalId"
+								}
+								else if (editParam == "institutionalId") { // In the case that the user wants to edit "institutionalId"
 									string inputString2;
 									unsigned long int replacementInstitutionalId;
 									bool validInput = true;
@@ -1967,11 +2121,13 @@ int main() {
 
 										if (validInput == true) {
 											go = true;
-										} else if (inputString2 == "exit" || inputString2 == "Exit") {
+										}
+										else if (inputString2 == "exit" || inputString2 == "Exit") {
 											cout << "Returning." << endl;
 											localGo = true;
 											go = true;
-										} else {
+										}
+										else {
 											cout << "This input is invalid.  Please try again." << endl;
 										}
 										validId = true;
@@ -1985,11 +2141,13 @@ int main() {
 									}
 									localGo = true;
 
-								} else {
+								}
+								else {
 									cout << "ERROR: IMPROPERLY DEFINED VALUE OF EDITPARAM." << endl;
 								}
 
-							} else {
+							}
+							else {
 								cout << "ERROR:  FAILED TO PROPERLY RETURN USERS SEARCH TYPE.";
 								localGo = true;
 							}
@@ -2000,14 +2158,15 @@ int main() {
 					go = false;
 
 
-				} else { // Deny access to this command if the user is not an admin
+				}
+				else { // Deny access to this command if the user is not an admin
 					cout << "Access denied: Invalid credentials." << endl;
 				}
 
 
 
-			// - Can view the total number of currently active users in the system
-			// Admin only
+				// - Can view the total number of currently active users in the system
+				// Admin only
 			}
 			else if (input == "getactive") {
 				if (permlevel == "Admin") {
@@ -2021,8 +2180,8 @@ int main() {
 
 
 
-			// - Can facilitate book returns
-			// Admin only
+				// - Can facilitate book returns
+				// Admin only
 			}
 			else if (input == "return") {
 				bool localGo = false;
@@ -2039,7 +2198,7 @@ int main() {
 							}
 							catch (const std::invalid_argument&) { validId = false; }
 							catch (const std::out_of_range&) { validId = false; }
-							
+
 							bool itemExists = false; // boolean to check if the id exists within the inventory.  If an item with the given id exists, available = true;
 							bool itemAvailable = false; // Boolean to set if the given item has an "available" value of true or false.  If available = true, itemAvailable = true.  To continuethe process, this variable needs to be false.
 							if (validId == true) {
@@ -2050,22 +2209,25 @@ int main() {
 							if (itemExists == true) {
 								if (itemAvailable == false) {
 									go = true;
-								} else {
+								}
+								else {
 									// In the case that itemExists = true, but itemAvailable = false;
 									cout << "That item is already available." << endl;
 									go = true;
 									globalGo = true;
 								}
-							} else if (inputString == "exit" || inputString == "Exit") {
+							}
+							else if (inputString == "exit" || inputString == "Exit") {
 								cout << "Returning." << endl;
 								localGo = true;
 								go = true;
-							} else {
+							}
+							else {
 								cout << "This input is invalid, or no item with that id exists.  Please try again." << endl;
 							}
 							validId = true;
 						}
-	
+
 						if (localGo == false) {
 							// TODO: Find the item in book.txt with an id equal to itemId, set its value of Available to "false" and set its value of renterId to 0
 						}
@@ -2073,7 +2235,8 @@ int main() {
 						cout << "Item renewed." << endl;
 						go = true;
 						localGo = true;
-					} else {
+					}
+					else {
 						cout << "Access denied: Invalid credentials." << endl;
 					}
 				}
@@ -2083,46 +2246,46 @@ int main() {
 				// Help command
 				// Displays a list of commands
 
-				
+
 			}
 
 			else if (input == "addsimple") {
-   			 string filename, line;
-   			 cout << "File name (e.g., books.txt): ";
-   			 cin >> filename;
-   			 cout << "Enter line to add: ";
-   			 cin.ignore();
-   			 getline(cin, line);
+				string filename, line;
+				cout << "File name (e.g., books.txt): ";
+				cin >> filename;
+				cout << "Enter line to add: ";
+				cin.ignore();
+				getline(cin, line);
 
-			 //sep func. append to file
-   			 addToFile(filename, line);
-}
+				//sep func. append to file
+				addToFile(filename, line);
+			}
 
 			else if (input == "viewsimple") {
- 		  	string filename;
-   			cout << "File name to view: ";
-    		cin >> filename;
+				string filename;
+				cout << "File name to view: ";
+				cin >> filename;
 
-			//sep func. view file
-    		viewFile(filename);
-}
+				//sep func. view file
+				viewFile(filename);
+			}
 
 			else if (input == "overwritesimple") {
-    		string filename;
-    		cout << "File name to overwrite: ";
-    		cin >> filename;
+				string filename;
+				cout << "File name to overwrite: ";
+				cin >> filename;
 
-			//sep func. overwrite file
-    		overwriteFile(filename);
-}
+				//sep func. overwrite file
+				overwriteFile(filename);
+			}
 
-			
+
 			else if (input == "help") {
 				cout << "A list of valid commands are:" << endl;
 				cout << "- borrow:  Borrow and check out books in our library's inventory." << endl;
 				cout << "- search:  Search through our library's inventory.";
-					if (permlevel == "Admin") { cout << "  Admins can also search for user accounts."; }
-					cout << endl;
+				if (permlevel == "Admin") { cout << "  Admins can also search for user accounts."; }
+				cout << endl;
 				if (permlevel == "Admin") {
 					cout << "- editinv:  Add, delete or edit inventory items." << endl;
 					cout << "- editusers:  Add, delete, or edit user accounts." << endl;
@@ -2133,13 +2296,15 @@ int main() {
 
 				// Logout command
 				// Ends the current login loop and returns to the original requests upon bootup
-			} else if (input == "logout") {
+			}
+			else if (input == "logout") {
 				cout << "See you next time!";
 				permlevel = "";
 				isLoggedIn = false;
 
 				// In case of an invalid command
-			} else {
+			}
+			else {
 				cout << "Command not recognized.  Please input \"help\" to see a list of commands." << endl;
 				std::cin.clear(); // Clears the failbit on cin so that it can detect an invalid string again
 				std::cin.ignore(256, '\n');
@@ -2161,3 +2326,4 @@ int main() {
 // Admin command:  Delete user account
 // Admin command:  Edit user item
 // Admin command:  Request number of currently active users in system
+
